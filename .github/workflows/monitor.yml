@@ -1,0 +1,26 @@
+name: Monitor Diario PNCP - Grupo Cantanhede
+
+on:
+  schedule:
+    - cron: '30 11 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  monitorar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Instalar dependencias
+        run: pip install requests
+      - name: Executar monitor PNCP
+        env:
+          EMAIL_REMETENTE: ${{ secrets.EMAIL_REMETENTE }}
+          SENHA_APP_GMAIL: ${{ secrets.SENHA_APP_GMAIL }}
+          EMAIL_DESTINATARIO: ${{ secrets.EMAIL_DESTINATARIO }}
+        run: python monitor.py
