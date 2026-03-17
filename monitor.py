@@ -115,7 +115,8 @@ def card_html(item, cor_cliente):
         f'<span style="background:#e8f5e9;color:#27ae60;padding:2px 8px;border-radius:12px;font-size:12px"><b>💰 {item["valor"]}</b></span>'
         f'</div>'
         f'<p style="margin:8px 0;font-size:14px;color:#333">{obj}</p>'
-        f'<a href="{item["link"]}" style="color:#1a56db;font-size:13px;text-decoration:none">🔗 Acessar edital no PNCP →</a>'
+        f'<span style="background:#e8f4fd;color:#1a56db;padding:2px 8px;border-radius:10px;font-size:12px">🌐 {item.get("portal","PNCP")}</span>'
+        f'<br><a href="{item["link"]}" style="color:#1a56db;font-size:13px;text-decoration:none">🔗 Acessar edital no PNCP →</a>'
         f'</div>'
     )
 
@@ -171,13 +172,22 @@ def rodar():
                 for item in items:
                     obj = item.get("objetoCompra", "")
                     if tem_palavra(obj, cliente["palavras"]):
+                        lnk_s = (item.get("linkSistemaOrigem") or "").lower()
+                        if "portaldecompraspublicas" in lnk_s: portal = "Portal de Compras Publicas"
+                        elif "bnccompras" in lnk_s or "bnc.org" in lnk_s: portal = "BNC Compras"
+                        elif "licitanet" in lnk_s: portal = "Licitanet"
+                        elif "bllcompras" in lnk_s or "bll.org" in lnk_s: portal = "BLL Compras"
+                        elif "licitacoes-e" in lnk_s: portal = "Licitacoes-e (BB)"
+                        elif "compras.gov" in lnk_s or "gov.br" in lnk_s: portal = "Compras.gov.br"
+                        else: portal = "PNCP"
                         resultados_por_cliente[cliente["nome"]].append({
                             "objeto": obj,
                             "orgao": item.get("orgaoEntidade", {}).get("razaoSocial", "N/I"),
                             "valor": fmt_valor(item.get("valorTotalEstimado")),
                             "modalidade": mod_nome,
                             "uf": item.get("unidadeOrgao", {}).get("ufSigla", uf or "BR"),
-                            "link": gerar_link(item)
+                            "link": gerar_link(item),
+                            "portal": portal,
                         })
         total_c = len(resultados_por_cliente[cliente["nome"]])
         print(f"  -> {total_c} resultado(s) encontrado(s)")
